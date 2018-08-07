@@ -1,0 +1,37 @@
+DROP TABLE IF EXISTS `p4_categories`;
+CREATE TABLE `p4_categories` (
+  `CategoryID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `Category` varchar(255) DEFAULT '',
+  `Description` text,
+  PRIMARY KEY (`CategoryID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO `p4_categories` (`CategoryID`, `Category`, `Description`) VALUES
+(1,	'Health',	'Latest news on Health'),
+(2,	'E-Sports',	'Latest news on E-Sports'),
+(3,	'Technology',	    'Latest news on Techology');
+
+DROP TABLE IF EXISTS `p4_feeds`;
+CREATE TABLE `p4_feeds` (
+  `FeedID` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `CategoryID` int(10) unsigned DEFAULT '0',
+  `FeedURL` varchar(255) DEFAULT '',
+  `Title` varchar(255) DEFAULT '',
+  `Description` text,
+  `PubDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`FeedID`),
+  KEY `CategoryID` (`CategoryID`),
+  CONSTRAINT `p4_feeds_ibfk_1` FOREIGN KEY (`CategoryID`) REFERENCES `p4_categories` (`CategoryID`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- insert rss feeds
+INSERT INTO `p4_feeds` (`FeedID`, `CategoryID`, `FeedURL`, `Title`, `Description`, `PubDate`) VALUES
+(1,	1,	'https://www.seattletimes.com/wellness/feed/',	'The Seattle Times Wellness – The Seattle Times',	'Pop cultural depictions of mental illness may do more harm than good',	'02 Aug 2018 06:00:00'),
+(2,	1,	'http://www.who.int/feeds/entity/hac/en/rss.xml',	'Emergencies and disasters',	'Latest news and updates on public health emergencies around the world',	'07 Aug 2018 18:01:48'),
+(3,	1,	'http://rss.cnn.com/rss/cnn_health.rss',	'CNN - Health',	'Find all health related news',	'07 Aug 2018 15:25:57'),
+(4,	2,	'http://na.leagueoflegends.com/en/rss.xml',	'League of Legends',	'The Latest News About the LOL',	'07 Aug 2018 15:25:57'),
+(5,	2,	'https://esports.yahoo.com/rss',	'Yahoo ESports',	'The Latest News About E-Sports',	'07 Aug 2018 15:25:57'),
+(6,	2,	'http://feeds.thescoreesports.com/cod.rss',	'Call of Duty',	'>Esports competition is grueling and can wear down even the best pro players',	'24 Mar 2018 19:02:48'),
+(7,	3,	'https://www.technologyreview.com/stories.rss',	'New on MIT Technology Review',	'MIT Technology Review',	'07 Aug 2018 22:41:52'),
+(8,	3,	'https://www.wired.com/feed/category/gear/latest/rss',	'Wired - Gear',	'The Latest Tech News on Gear',	'07 Aug 2018 22:43:11'),
+(9,	3,	'https://www.techrepublic.com/rssfeeds/topic/developer/',	'Tech Republic - Developer',	'The Latest Tech News on Developer',	'07 Aug 2018 22:43:55');
