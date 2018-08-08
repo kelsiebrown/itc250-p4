@@ -11,44 +11,42 @@ echo '<h3 align="center">News List</h3>';
 $prev = '<i class="fa fa-chevron-circle-left"></i>';
 $next = '<i class="fa fa-chevron-circle-right"></i>';
 
-//TODO: Write SQL to achieve categories, sub-categories and link. And fill them into the table.
-//TODO: Extra. Use cache to avoid communication with database continuously.
+//SQL Statements
+
+$sql = "SELECT s.FeedID, s.Title, s.FeedURL, s.Description, a.Category, 
+date_format(s.PubDate, '%W %D %M %Y %H:%i') 'DateAdded' FROM "
+. PREFIX . "feedsP4 s, " . PREFIX . "categoriesP4 a WHERE s.CategoryID=a.CategoryID order by s.CategoryID desc";
 
 
-//Just hard code right now.
-echo '
-<table class="table table-hover">
-    <thead>
-        <tr>
-          <th scope="col">Category</th>
-          <th scope="col">News</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr class="table-active">
-            <td>Health</td>
-            <td><a href="#">link1</a>
-                <a href="#">link2</a>
-                <a href="#">link3</a>
-            </td>
-        </tr>
-        <tr class="table-active">
-            <td>Technology</td>
-            <td><a href="#">link4</a>
-                <a href="#">link5</a>
-                <a href="#">link6</a>
-            </td>
-        </tr>
-        <tr class="table-active">
-            <td>Entertainment</td>
-            <td><a href="#">link7</a>
-                <a href="#">link8</a>
-                <a href="#">link9</a>
-            </td>
-        </tr>
-    </tbody>
-</table>
-';
-
-get_footer();
+# Create instance of new 'pager' class
+$myPager = new Pager(10,'',$prev,$next,'');
+$sql = $myPager->loadSQL($sql);  #load SQL, add offset
+# connection comes first in mysqli (improved) function
+$result = mysqli_query(IDB::conn(),$sql) or die(trigger_error(mysqli_error(IDB::conn()), E_USER_ERROR));
+    
+if(mysqli_num_rows($result) > 0)
+{#records exist - process
+	
+	while($row = mysqli_fetch_assoc($result))
+	{# process each row
+		echo '
+			<div class="list-group" style="margin: auto; width: 50%;">
+				<a href="' . VIRTUAL_PATH . 'surveys/feed_view.php?id=' . (int)$row['FeedID'] . '" class="list-group-item list-group-item-action flex-column align-items-start">
+					<div class="d-flex w-100 justify-content-between">
+						<h5 class="mb-1">' . dbOut($row['Title']) . '</h5>
+						<small>' . dbOut($row['Category']) . '</small>
+					</div>
+					<p class="mb-1">' . dbOut($row['Description']) . '</p>
+					<small>Click here for all the news!</small>
+				</a>
+			</div>
+			<br/>
+		';
+	}
+	echo $myPager->showNAV(); # show paging nav, only if enough records	 
+}else{#no records
+    echo "<div align=center>There are currently no feeds.</div>";	
+}
+@mysqli_free_result($result);
+get_footer(); #defaults to theme footer or footer_inc.php
 ?>
