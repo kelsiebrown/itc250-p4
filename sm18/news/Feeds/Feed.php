@@ -15,17 +15,23 @@ namespace Feeds;
 
 class Feed
 {
-	 public $FeedID = 0;
-	 public $FeedURL = "";
-	 public $Title = "";
-	 public $Description = "";
-	 public $PubDate = "";
-	 public $TotalArticles= 0;
-	 public $aFeed = Array();
+    public $FeedID = 0;
+    public $FeedURL = "";
+    public $Title = "";
+    public $Description = "";
+    public $isValid = false;
 	
-    function __construct($id)
-	{
-		$this->FeedID = (int)$id;
+    function __construct() {}
+    function setFields($ID, $URL, $Title, $Desc, $isValid) {
+        $this->ID = $ID;
+        $this->FeedURL = $URL;
+        $this->Title = $Title;
+        $this->Description = $Desc;
+        $this->isValid = $isValid;
+    }
+    
+    function setID($id) {
+        $this->FeedID = (int)$id;
 		if($this->FeedID == 0){return FALSE;}
 		
 		$sql = sprintf("SELECT Title, FeedURL, Description FROM " . PREFIX . "feedsP4 Where FeedID =%d",$this->FeedID);
@@ -44,7 +50,7 @@ class Feed
 		}
 		@mysqli_free_result($result);
 		if(!$this->isValid){return;}
-	}
+    }
 	
 	function showFeeds()
 	{

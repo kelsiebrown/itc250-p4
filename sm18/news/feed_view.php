@@ -14,14 +14,41 @@
 require '../inc_0700/config_inc.php';
 
 spl_autoload_register('MyAutoLoader::NamespaceLoader');
+startSession();
 # check variable of item passed in - if invalid data, forcibly redirect back to demo_list.php page
+
 if(isset($_GET['id']) && (int)$_GET['id'] > 0){
 	 $myID = (int)$_GET['id'];
 }else{
 	myRedirect(VIRTUAL_PATH . "feed.php");
 }
 
-$myFeed = new Feeds\Feed($myID);
+$myFeed = new Feeds\Feed();
+if(isset($_SESSION['feed']) && array_key_exists($myID, $_SESSION['feed'])) {
+    $arr = $_SESSION['feed'][$myID];
+    $time = $arr["time"];
+    if(time() > $time + 600) {//session is over 10 mins, just clear
+        $myFeed->setID($myID);
+        unset($_SESSION['feed']);
+        resetFeed($myFeed);
+    } else {//rechieve data from session
+        $myFeed->setFields($arr["ID"], $arr["URL"], $arr["Title"], $arr["Desc"],    $arr["valid"]);
+    }
+} else {//create new object and add into session
+    $myFeed->setID($myID);
+    resetFeed($myFeed);
+}
+
+function resetFeed($feed) {
+    $myArr = ["ID" => $feed->FeedID, 
+              "URL" => $feed->FeedURL, 
+              "Title" => $feed->Title, 
+              "Desc" => $feed->Description,
+              "valid" => $feed->isValid,
+              "time" => time()];
+    $_SESSION['feed'][$feed->FeedID] = $myArr;
+}
+
 if($myFeed->isValid)
 {
 	$config->titleTag = "'" . $myFeed->Title . "' Feed!";
@@ -37,18 +64,5 @@ get_header();
 <?php
 
 $myFeed->showFeeds();
-//if($myFeed->isValid)
-//{ #check to see if we have a valid FeedID
-//	echo '<br/>';
-//	$contents = file_get_contents($myFeed->FeedURL);
-//	$xml = simplexml_load_string($contents);
-//    foreach($xml->channel->item as $story)
-//  	{
-//		echo '<small>' . $story->pubDate . '</small><br />';
-//		echo '<a href="' . $story->link . '">' . $story->title . '</a><br />'; 
-//		echo '<p>' . $story->description . '</p>';
-//  	}
-//}else{
-//	echo "Sorry, no News!";	
-//}
+
 get_footer();
